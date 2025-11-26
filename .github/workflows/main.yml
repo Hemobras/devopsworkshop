@@ -66,5 +66,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/devopsworkshop:latest
+          tags: marlonanderson/devopsworkshop:latest
          
