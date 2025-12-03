@@ -84,5 +84,19 @@ jobs:
         run: kubectl create namespace tech-local --dry-run=client -o yaml | kubectl apply -f -
       - name: Apply manifests from repo
         run: kubectl apply -f k8s/manifests.yaml
+      - name: Debug pod status
+        run: |
+             kubectl get pods -n tech-local
+             kubectl describe deployment noir-fashion -n tech-local
+    
       - name: Wait for rollout
-        run: kubectl rollout status deployment/noir-fashion -n tech-local
+        run: kubectl rollout status deployment/noir-fashion -n tech-local --timeout=5m
+  
+      - name: Debug on failure
+        if: failure()
+        run: |
+         kubectl get pods -n tech-local
+         kubectl describe pods -n tech-local
+         kubectl logs -n tech-local -l app=noir-fashion --tail=50
+      - name: Wait for rollout
+        run: kubectl rollout status deployment/noir-fashion -n tech-local --timeout=5m
