@@ -67,8 +67,7 @@ jobs:
           context: .
           push: true
           tags: marlonanderson/devopsworkshop:latest
-     
-          
+            
   cd-local:
     runs-on: ubuntu-latest
     needs: docker
