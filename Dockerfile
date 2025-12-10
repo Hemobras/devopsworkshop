@@ -1,7 +1,21 @@
-# Build stage (se você tiver um processo de build)
-# Se for apenas HTML estático, você pode pular esta etapa
+# Build stage - compila a aplicação
+FROM node:18-alpine AS build
 
-# Production stage
+WORKDIR /app
+
+# Copie os arquivos de dependências
+COPY package*.json ./
+
+# Instale as dependências
+RUN npm ci --only=production
+
+# Copie todo o código fonte
+COPY . .
+
+# Execute o build (isso vai criar o diretório dist/)
+RUN npm run build
+
+# Production stage - serve com nginx
 FROM nginx:1.28.0-alpine
 
 # Remove a configuração padrão do nginx
@@ -10,13 +24,10 @@ RUN rm /etc/nginx/conf.d/default.conf
 # Copie a configuração customizada para porta 8080
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copie os arquivos da aplicação
-# Ajuste o caminho de acordo com a estrutura do seu projeto
-COPY ./dist /usr/share/nginx/html
-# OU se os arquivos estão na raiz:
-# COPY . /usr/share/nginx/html
+# Copie os arquivos buildados do stage anterior
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Crie o diretório de logs se não existir
+# Crie o diretório de logs e ajuste permissões
 RUN mkdir -p /var/log/nginx && \
     chown -R nginx:nginx /var/log/nginx && \
     chown -R nginx:nginx /var/cache/nginx && \

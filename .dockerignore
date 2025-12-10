@@ -1,18 +1,47 @@
+# Git
 .git
 .gitignore
+.gitattributes
+
+# CI/CD
 .github
+.gitlab-ci.yml
+Dockerfile
+.dockerignore
+
+# Kubernetes
+k8s
+
+# Documentation
+README.md
+LICENSE
+*.md
+REGRAS_DE_NEGOCIO.md
+DOCKER.md
+
+# Node
 node_modules
 npm-debug.log
 yarn-error.log
-.DS_Store
+
+# Backend (não precisa no frontend)
+api
+
+# Environment
 .env
-.env.local
-Dockerfile
-docker-compose.yml
-.dockerignore
-*.md
+.env.*
+
+# IDE
 .vscode
 .idea
-coverage
-dist
-build
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts that aren't needed
+*.log
+.cache
