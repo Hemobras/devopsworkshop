@@ -151,17 +151,66 @@ jobs:
               exit 1
           fi
           
-          # Limpar port-forward
+          # Limpar port-forward apenas do teste
           kill $PF_PID 2>/dev/null || true
           echo "✅ Todos os testes passaram!"
+          
+      - name: Setup port-forward permanente
+        run: |
+          echo "🚀 Iniciando port-forward permanente..."
+          nohup kubectl port-forward -n tech-local svc/noir-frontend 8080:8080 > /dev/null 2>&1 &
+          echo "✅ Port-forward configurado!"
           
       - name: Show access information
         run: |
           echo "=========================================="
           echo "🚀 Aplicação implantada com sucesso!"
           echo "=========================================="
-          echo "Access URL: http://localhost:8080"
-          echo "Namespace: tech-local"
-          echo "Service: noir-frontend"
+          echo ""
+          echo "📍 INFORMAÇÕES DE ACESSO:"
+          echo "   URL Local: http://localhost:8080"
+          echo "   Namespace: tech-local"
+          echo "   Service: noir-frontend"
+          echo ""
+          echo "🔧 COMANDOS ÚTEIS:"
+          echo "   kubectl get all -n tech-local"
+          echo "   kubectl logs -f deployment/noir-frontend -n tech-local"
+          echo "   kubectl port-forward -n tech-local svc/noir-frontend 8080:8080"
+          echo ""
+          echo "=========================================="
+          echo "📊 RECURSOS IMPLANTADOS:"
           echo "=========================================="
           kubectl get all -n tech-local
+          echo ""
+          echo "=========================================="
+          echo "⏰ CLUSTER PERMANECE ATIVO!"
+          echo "=========================================="
+          echo ""
+          echo "⚠️  IMPORTANTE:"
+          echo "   O cluster Kind permanecerá ativo durante esta sessão."
+          echo "   Para manter o acesso, use:"
+          echo "   kubectl port-forward -n tech-local svc/noir-frontend 8080:8080"
+          echo ""
+          echo "   Para deletar o cluster manualmente:"
+          echo "   kind delete cluster --name devopsworkshop-local"
+          echo "=========================================="
+          
+      - name: Keep cluster alive
+        run: |
+          echo "🔄 Mantendo cluster ativo..."
+          echo "O cluster ficará disponível enquanto o job estiver rodando."
+          echo "Pressione Ctrl+C para encerrar (apenas em execuções manuais)."
+          
+          # Para workflow_dispatch, manter o job rodando por 1 hora
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "⏳ Cluster ficará ativo por 1 hora..."
+            for i in {1..60}; do
+              echo "⏰ Tempo decorrido: ${i} minuto(s) de 60"
+              kubectl get pods -n tech-local --no-headers 2>/dev/null || echo "Cluster ainda ativo..."
+              sleep 60
+            done
+            echo "⏰ Tempo limite atingido (1 hora). Encerrando..."
+          else
+            echo "✅ Deploy concluído! Cluster está pronto."
+            echo "💡 Use 'workflow_dispatch' para manter o cluster ativo por mais tempo."
+          fi
