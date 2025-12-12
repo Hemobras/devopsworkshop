@@ -1,16 +1,20 @@
-FROM nginx:1.28-alpine
+FROM nginx:alpine
 
-
-# se você tem config customizada, copie aqui
-COPY ./nginx.conf /etc/nginx/nginx.conf
+# Copiar arquivos da aplicação
 COPY ./dist /usr/share/nginx/html
 
-# cria /run e dá ownership ao usuário nginx (usuário 'nginx' existe na image oficial)
-RUN mkdir -p /run \
-    && touch /run/nginx.pid \
-    && chown -R nginx:nginx /run
+# Copiar configuração do nginx
+COPY nginx.conf /etc/nginx/nginx.conf
 
+# Criar diretórios temporários e dar permissões
+RUN mkdir -p /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp && \
+    chown -R nginx:nginx /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp && \
+    chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html
+
+# Mudar para usuário não-root
 USER nginx
 
-# entrypoint padrão do nginx: mantém em foreground
+EXPOSE 8080
+
 CMD ["nginx", "-g", "daemon off;"]
